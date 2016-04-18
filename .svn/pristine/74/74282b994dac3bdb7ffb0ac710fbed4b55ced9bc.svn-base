@@ -1,0 +1,129 @@
+package com.ipc;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+
+public class ReadXmlFile {
+
+	
+	public List<CfClassIpc> getIPCData() {
+		DocumentBuilder dBuilder = null;
+		List<CfClassIpc> list = new ArrayList<CfClassIpc>();
+		try {
+			 
+			dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+			Document document = dBuilder.parse(new File(IpcPath.READ_XML));
+			document.getDocumentElement().normalize();
+			document.getDocumentElement().getNodeName();
+			NodeList nList = document.getElementsByTagName("ipcEntry");
+		//	System.out.println("---------------------------- Nodes " + nList.getLength());
+			for (int temp = 0; temp < nList.getLength(); temp++) {
+				Node nNode = nList.item(temp);
+					 nNode.getNodeName();
+				CfClassIpc cfClassIpc = new CfClassIpc();
+				if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+		 
+					Element eElement = (Element) nNode;
+							eElement.getAttribute("kind");
+							eElement.getAttribute("symbol");
+							eElement.getAttribute("edition");
+							eElement.getAttribute("lang");
+					String symbol = eElement.getAttribute("symbol");
+					
+					eElement.getElementsByTagName("text").item(0).getTextContent();
+					
+					eElement.getElementsByTagName("text").item(0).getTextContent();
+					
+					//Language
+					cfClassIpc.setLanguage("EN");
+					//Version
+					cfClassIpc.setVersion("1");
+					//Name
+					String name=eElement.getElementsByTagName("text").item(0).getTextContent();
+					cfClassIpc.setName(name);
+					// Section Code
+					cfClassIpc.setSectionCode(symbol.substring(0, 1));
+					
+					//Class code
+					cfClassIpc.setClassCode(symbol.substring(1, 3));
+					
+					//Subclass code
+					
+					cfClassIpc.setSubClassCode(symbol.substring(3, 4));
+					
+					//Group code
+					
+					cfClassIpc.setGroupCode(symbol.substring(4, 8));
+					
+					//SubGroup Code
+					
+					cfClassIpc.setSubGroupCode(symbol.substring(8, 14));
+					
+					
+					//Edition
+					String[] edi = (eElement.getAttribute("edition")).split(",");
+					int []a = null;
+					List<Integer> lst = new ArrayList<Integer>();
+					for (int i = 0; i < edi.length; i++) {
+						lst.add(Integer.parseInt(edi[i]));
+					}
+					int edition = 0;
+					
+					edition=max(lst);
+				
+					//int edition = Integer.parseInt(eElement.getAttribute("edition"));
+					int editionCode = 8;
+					if (edition >= 19680901 && edition <= 19740630) {
+						editionCode = 1;
+					} else if (edition >= 19740701 && edition <= 19791231) {
+						editionCode = 2;
+					}else if (edition >= 19800101  && edition <= 19841231) {
+						editionCode = 3;
+					}else if (edition >= 19850101  && edition <= 19891231) {
+						editionCode = 4;
+					}else if (edition >= 19900101  && edition <= 19941231) {
+						editionCode = 5;
+					}else if (edition >= 19950101  && edition <= 19991231 ) {
+						editionCode = 6;
+					}else if (edition >= 20000101  && edition <= 20051231 ) {
+						editionCode = 7;
+					} else  {
+						editionCode = 8;
+					}
+					cfClassIpc.setEditionCode(editionCode + "");
+				}
+				list.add(cfClassIpc);
+				//return list;
+				}
+			
+		
+		    } catch (Exception e) {
+			e.printStackTrace();
+		    }
+		//System.out.println("List size : " + list.size());
+		return list;
+	}
+	
+		public static int max(List<Integer> a)
+		{
+			int maxVal=0;
+			for(Integer intgr: a)
+	    {
+	        if(intgr>maxVal)
+	            {
+	                maxVal=intgr;
+	            }
+	        }
+	        return maxVal;
+  }
+
+}

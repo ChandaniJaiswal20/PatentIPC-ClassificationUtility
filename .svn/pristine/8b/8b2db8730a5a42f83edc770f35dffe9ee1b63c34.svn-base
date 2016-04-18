@@ -1,0 +1,257 @@
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+public class ReadIPCXmlFile {
+
+	private static final String END_REF_ATTRIB = "endRef";
+	private static final String MREF_NODE = "mref";
+	private static final String REF_ATTRIB = "ref";
+	private static final String SREF_NODE = "sref";
+	private static final String ENTRY_REFERENCE_NODE = "entryReference";
+	private static final String TEXT_NODE = "text";
+	private static final String TITLE_PART_NODE = "titlePart";
+	private static final String TEXT_BODY_NODE = "textBody";
+	private static final String SYMBOL_ATTRIB = "symbol";
+	private static final String LANG_ATTRIB = "lang";
+	private static final String KIND_ATTRIB = "kind";
+	private static final String IPC_ENTRY_NODE = "ipcEntry";
+	private static final int FULL_SYMBOL_LENGTH = 14;
+
+	
+	public List<CfClassIpc> getIPCData(String fileInput) {
+		DocumentBuilder dBuilder = null;
+		List<CfClassIpc> listOfIPC = new ArrayList<CfClassIpc>();
+		try {
+			dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+			Document document = dBuilder.parse(new File(fileInput));
+			document.getDocumentElement().normalize();
+			document.getDocumentElement().getNodeName();
+
+			String earlierLang = "EN"; // default lang
+			NodeList ipcEntryNodeList = document.getElementsByTagName(IPC_ENTRY_NODE);
+			for (int nodeCount = 0; nodeCount < ipcEntryNodeList.getLength(); nodeCount++) {
+				Node ipcEntryNode = ipcEntryNodeList.item(nodeCount);
+
+				CfClassIpc cfClassIpc = new CfClassIpc();
+				if (ipcEntryNode.getNodeType() == Node.ELEMENT_NODE) {
+
+					Element ipcEntryElement = (Element) ipcEntryNode;
+
+					String kindAttrib = ipcEntryElement.getAttribute(KIND_ATTRIB);
+					// Check whether the ipcEntry node eligible for
+					// transformation
+					if (!evaluateNodeEligibility(kindAttrib)) {
+						continue;
+					}
+
+					// Language
+					String ipcLanguage = ipcEntryElement.getAttribute(LANG_ATTRIB);
+					if (ipcLanguage == null || "".equals(ipcLanguage)) {
+						ipcLanguage = earlierLang;
+					} else {
+						earlierLang = ipcLanguage;
+					}
+					cfClassIpc.setLanguage(ipcLanguage);
+
+					// Row Version by default 1
+					cfClassIpc.setVersion("1");
+
+					// Fetching symbol value and rest logic dependent on this
+					String symbol = ipcEntryElement.getAttribute(SYMBOL_ATTRIB);
+
+					// Section Code
+					cfClassIpc.setSectionCode(symbol.substring(0, 1));
+
+					// Class code
+					cfClassIpc.setClassCode(symbol.substring(1, 3));
+
+					// Subclass code
+					cfClassIpc.setSubClassCode(symbol.substring(3, 4));
+
+					// Group code & Sub group code
+					if (kindAttrib.equals("u")) {
+						cfClassIpc.setGroupCode("000");
+						cfClassIpc.setSubGroupCode("00000");
+
+					} else {
+						String groupCode = symbol.substring(4, 8);
+						String subGroupCode = symbol.substring(8, 14);
+
+						if ("0000".equals(groupCode)) {
+							groupCode = "000";
+						} else {
+							groupCode = trimLeadingZeroes(groupCode);
+						}
+
+						if ("000000".equals(subGroupCode)) {
+							subGroupCode = "00000";
+						} else {
+							subGroupCode = removeTrailingZeros(subGroupCode);
+						}
+
+						cfClassIpc.setGroupCode(groupCode);
+						cfClassIpc.setSubGroupCode(subGroupCode);
+					}
+
+					// Edition
+					cfClassIpc.setEditionCode(IPCXmlDataTrasformation.configProperties.getProperty("edition"));
+
+					// Fetching IPC Name and its child
+					// Node traversing is /textBody/titlePart*
+					NodeList textBodyNodeList = ipcEntryElement.getElementsByTagName(TEXT_BODY_NODE);
+					if (textBodyNodeList != null && textBodyNodeList.getLength() > 0) {
+						// Only one textBody under each ipcEntry node
+						Element textBodyNode = (Element) textBodyNodeList.item(0);
+						NodeList titlePartNodeList = textBodyNode.getElementsByTagName(TITLE_PART_NODE);
+
+						if (titlePartNodeList != null) {
+							StringBuffer titleText = new StringBuffer();
+							StringBuffer entryRefText;// = new StringBuffer();
+
+							// Traversing through the Title part node
+							for (int i = 0; i < titlePartNodeList.getLength(); i++) {
+								NodeList titlePartNode = titlePartNodeList.item(i).getChildNodes();
+								if (titlePartNode != null) {
+									entryRefText = new StringBuffer();
+									for (int j = 0; j < titlePartNode.getLength(); j++) {
+										Node titlePartChild = titlePartNode.item(j);
+										if (titlePartChild.getNodeType() == Node.ELEMENT_NODE) {
+
+											if (TEXT_NODE.equalsIgnoreCase(titlePartChild.getNodeName())) {
+												if (titleText.length() == 0) {
+													titleText.append(titlePartChild.getTextContent());
+												} else {
+													titleText.append(";").append(titlePartChild.getTextContent());
+												}
+											} else if (ENTRY_REFERENCE_NODE.equalsIgnoreCase(titlePartChild
+													.getNodeName())) {
+												traverseEntryReferenceNode(entryRefText, titlePartChild);
+
+											}
+
+										}
+
+									}
+									if (entryRefText.length() > 0) {
+										// this may be improved
+										String strEntryRef = entryRefText.toString().replaceAll(", ,", "");
+										titleText.append("(").append(strEntryRef).append(")");
+									}
+
+								}
+
+							}
+							if (titleText.length() == 0) {
+								cfClassIpc.setName("");
+							} else {
+								cfClassIpc.setName(titleText.toString());
+							}
+
+						}
+
+					}
+
+				}
+				listOfIPC.add(cfClassIpc);
+				// return list;
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return listOfIPC;
+	}
+
+	private void traverseEntryReferenceNode(StringBuffer entryRefText, Node titlePartChild) {
+		if (entryRefText.length() == 0) {
+			entryRefText.append(titlePartChild.getTextContent());
+		} else {
+			entryRefText.append(";").append(titlePartChild.getTextContent());
+		}
+		StringBuffer refText = new StringBuffer();
+		NodeList entryRefNodeList = titlePartChild.getChildNodes();
+		if (entryRefNodeList != null) {
+			for (int k = 0; k < entryRefNodeList.getLength(); k++) {
+				Node entryRefNode = entryRefNodeList.item(k);
+				getTextFromEntryRefNode(refText, entryRefNode);
+			}
+			entryRefText.append(refText);
+
+		}
+	}
+
+	private void getTextFromEntryRefNode(StringBuffer refText, Node entryRefNode) {
+		if (entryRefNode.getNodeType() == Node.ELEMENT_NODE) {
+			if (SREF_NODE.equalsIgnoreCase(entryRefNode.getNodeName())) {
+				Element entryRefNodeElement = (Element) entryRefNode;
+				String srefAtribValue = getSymbolDisplayName(entryRefNodeElement.getAttribute(REF_ATTRIB));
+				if (refText.length() > 0) {
+					refText.append(", ").append(srefAtribValue);
+				} else {
+					refText.append(" ").append(srefAtribValue);
+				}
+
+			} else if (MREF_NODE.equalsIgnoreCase(entryRefNode.getNodeName())) {
+				Element entryRefNodeElement = (Element) entryRefNode;
+				String mrefAtribStart = getSymbolDisplayName(entryRefNodeElement.getAttribute(REF_ATTRIB));
+				String mrefAtribEnd = getSymbolDisplayName(entryRefNodeElement.getAttribute(END_REF_ATTRIB));
+				if (refText.length() > 0) {
+					refText.append(", ").append(mrefAtribStart).append("-").append(mrefAtribEnd);
+				} else {
+					refText.append(" ").append(mrefAtribStart).append("-").append(mrefAtribEnd);
+				}
+
+			}
+
+		}
+	}
+
+	private boolean evaluateNodeEligibility(String kind) {
+		// if the kind code is u,m or value from 1 to 9 then return true;
+		if (kind.matches("[um1-9]")) {
+			return true;
+		}
+		return false;
+	}
+
+	private String trimLeadingZeroes(String a) {
+		return a.replaceAll("^0+(?=\\d+$)", "");
+	}
+
+	private String removeTrailingZeros(String b) {
+		return b.replaceAll("[0]*$", "");
+	}
+
+	private String getSymbolDisplayName(String symbolName) {
+		String retSymbol = symbolName;
+		if (symbolName.length() == FULL_SYMBOL_LENGTH) { // full symbol length;
+			String groupCode = symbolName.substring(4, 8);
+			String subGroupCode = symbolName.substring(8, 14);
+
+			if ("0000".equals(groupCode)) {
+				groupCode = "00";
+			} else {
+				groupCode = trimLeadingZeroes(groupCode);
+			}
+
+			if ("000000".equals(subGroupCode)) {
+				subGroupCode = "00";
+			} else {
+				subGroupCode = removeTrailingZeros(subGroupCode);
+			}
+
+			retSymbol = symbolName.substring(0, 4) + " " + groupCode + "/" + subGroupCode;
+		}
+		return retSymbol;
+	}
+
+}

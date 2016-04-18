@@ -1,0 +1,69 @@
+package com.ipc;
+
+public class CfClassIpc {
+
+	private String classCode;
+	private String editionCode;
+	private String groupCode;
+	private String subGroupCode;
+	private String name;
+	private String sectionCode;
+	private String subClassCode;
+	private String version;
+	private String language;
+
+	public String getLanguage() {
+		return language;
+	}
+	public void setLanguage(String language) {
+		this.language = language;
+	}
+	public String getClassCode() {
+		return classCode;
+	}
+	public void setClassCode(String classCode) {
+		this.classCode = classCode;
+	}
+	public String getEditionCode() {
+		return editionCode;
+	}
+	public void setEditionCode(String editionCode) {
+		this.editionCode = editionCode;
+	}
+	public String getGroupCode() {
+		return groupCode;
+	}
+	public void setGroupCode(String groupCode) {
+		this.groupCode = groupCode;
+	}
+	public String getSubGroupCode() {
+		return subGroupCode;
+	}
+	public void setSubGroupCode(String subGroupCode) {
+		this.subGroupCode = subGroupCode;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getSectionCode() {
+		return sectionCode;
+	}
+	public void setSectionCode(String sectionCode) {
+		this.sectionCode = sectionCode;
+	}
+	public String getSubClassCode() {
+		return subClassCode;
+	}
+	public void setSubClassCode(String subClassCode) {
+		this.subClassCode = subClassCode;
+	}
+	public String getVersion() {
+		return version;
+	}
+	public void setVersion(String version) {
+		this.version = version;
+	}
+}

@@ -1,0 +1,241 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+public class IPCXmlDataTrasformation {
+
+	public static final String IPC_ROOT_NODE_NAME = "EXPORT";
+	public static final String IPC_TABLE_NODE_NAME = "TABLE";
+	public static final String IPC_TABLE_ATTRIB_NAME = "NAME";
+	public static final String IPC_TABLE_ATTRIB_VALUE = "CF_CLASS_IPC";
+	public static final String IPC_TABLE_ROW_NODE = "ROW";
+	public static final String IPC_CLASS_CODE_NODE = "IPC_CLASS_CODE";
+	public static final String IPC_TYPE_ATTRIB = "TYPE";
+	public static final String IPC_EDITION_CODE_NODE = "IPC_EDITION_CODE";
+	public static final String IPC_GROUP_CODE_NODE = "IPC_GROUP_CODE";
+
+	public static final String IPC_SECTION_CODE_NODE = "IPC_SECTION_CODE";
+	public static final String IPC_SUBCLASS_CODE_NODE = "IPC_SUBCLASS_CODE";
+	public static final String IPC_SUBGROUP_CODE_NODE = "IPC_SUBGROUP_CODE";
+	public static final String ROW_VERSION_NODE = "ROW_VERSION";
+
+	public static final String VERSION_ATTRIB = "VERSION";
+	public static final String LANG_ATTRIB = "LANGUAGE";
+	public static final String NOTES_ATTRIB = "NOTES";
+	public static final String EXPORT_ID_ATTRIB = "EXPORT_ID";
+
+	public static final String Character = "C";
+	public static final String Number = "N";
+
+	protected static Properties configProperties = new Properties();
+
+	/**
+	 * @param args
+	 * @throws IOException
+	 * @throws FileNotFoundException
+	 * 
+	 * 
+	 */
+	public static void main(String[] args) throws FileNotFoundException, IOException {
+		// TODO Auto-generated method stub
+		DocumentBuilder dBuilder = null;
+		Set<String> tempSet = new HashSet<String>();
+		int lengthName = 0;
+		try {
+			// Read IPC properties
+			loadConfiguration();
+
+			dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+			Document doc = dBuilder.newDocument();
+			Element rootElement = doc.createElement(IPC_ROOT_NODE_NAME);
+
+			doc.appendChild(rootElement);
+			// Properties prop = new Properties();
+			// configProperties.load(fileInputStream);
+			// Attribute
+			Attr export_id = doc.createAttribute(EXPORT_ID_ATTRIB);
+			export_id.setValue(configProperties.getProperty("export_id"));
+			rootElement.setAttributeNode(export_id);
+
+			// Attribute
+			Attr notes = doc.createAttribute(NOTES_ATTRIB);
+			notes.setValue(configProperties.getProperty("Notes"));
+			rootElement.setAttributeNode(notes);
+			// Attribute
+			Attr version = doc.createAttribute(VERSION_ATTRIB);
+			version.setValue(configProperties.getProperty("Version"));
+			rootElement.setAttributeNode(version);
+			// Element
+			Element table = doc.createElement(IPC_TABLE_NODE_NAME);
+			rootElement.appendChild(table);
+			// Attribute
+			Attr root = doc.createAttribute(IPC_TABLE_ATTRIB_NAME);
+			root.setValue(IPC_TABLE_ATTRIB_VALUE);
+			table.setAttributeNode(root);
+
+			File folder = new File(configProperties.getProperty("ipc.import.folderpath"));
+			File[] listOfFiles = folder.listFiles();
+
+			ReadIPCXmlFile readXMLFile = new ReadIPCXmlFile();
+			int ipcRows = 0;
+			for (File file : listOfFiles) {
+				if (file.isFile()) {
+
+					String fileName = file.getName();
+					System.out.println("File name: " + fileName);
+					if (fileName.length() == 8 && fileName.toLowerCase().endsWith(".xml")) {
+
+						List<CfClassIpc> list = readXMLFile.getIPCData(file.getAbsolutePath());
+						if (list != null && list.size() > 0) {
+							for (CfClassIpc ipasRow : list)
+
+							{
+								ipcRows++;
+								// Element
+								Element row = doc.createElement(IPC_TABLE_ROW_NODE);
+								table.appendChild(row);
+								// Attribute
+								Attr lang = doc.createAttribute(LANG_ATTRIB);
+								lang.setValue(ipasRow.getLanguage());
+								rootElement.setAttributeNode(lang);
+								// Class Element
+								Element firstname = doc.createElement(IPC_CLASS_CODE_NODE);
+								firstname.appendChild(doc.createTextNode(ipasRow.getClassCode()));
+								row.appendChild(firstname);
+								// Attribute
+								Attr attr = doc.createAttribute(IPC_TYPE_ATTRIB);
+								attr.setValue(Character);
+								firstname.setAttributeNode(attr);
+								// Edition Element
+								Element secondname = doc.createElement(IPC_EDITION_CODE_NODE);
+								secondname.appendChild(doc.createTextNode(ipasRow.getEditionCode()));
+								row.appendChild(secondname);
+								// Attribute
+								Attr attr1 = doc.createAttribute(IPC_TYPE_ATTRIB);
+								attr1.setValue(Character);
+								secondname.setAttributeNode(attr1);
+								// Group Element
+								Element thirdname = doc.createElement(IPC_GROUP_CODE_NODE);
+								thirdname.appendChild(doc.createTextNode(ipasRow.getGroupCode()));
+								row.appendChild(thirdname);
+								// Attribute
+								Attr attr2 = doc.createAttribute(IPC_TYPE_ATTRIB);
+								attr2.setValue(Character);
+								thirdname.setAttributeNode(attr2);
+								// Name Element
+								Element fourname = doc.createElement("IPC_NAME");
+								fourname.appendChild(doc.createTextNode(ipasRow.getName()));
+								row.appendChild(fourname);
+								// Attribute
+								Attr attr3 = doc.createAttribute(IPC_TYPE_ATTRIB);
+								attr3.setValue(Character);
+								fourname.setAttributeNode(attr3);
+								// Section Element
+								Element fivename = doc.createElement(IPC_SECTION_CODE_NODE);
+								fivename.appendChild(doc.createTextNode(ipasRow.getSectionCode()));
+								row.appendChild(fivename);
+								// Attribute
+								Attr attr4 = doc.createAttribute(IPC_TYPE_ATTRIB);
+								attr4.setValue(Character);
+								fivename.setAttributeNode(attr4);
+								// Subclass Element
+								Element sixname = doc.createElement(IPC_SUBCLASS_CODE_NODE);
+								sixname.appendChild(doc.createTextNode(ipasRow.getSubClassCode()));
+								row.appendChild(sixname);
+								// Attribute
+								Attr attr5 = doc.createAttribute(IPC_TYPE_ATTRIB);
+								attr5.setValue(Character);
+								sixname.setAttributeNode(attr5);
+								// SubGroup Element
+								Element sevenname = doc.createElement(IPC_SUBGROUP_CODE_NODE);
+								sevenname.appendChild(doc.createTextNode(ipasRow.getSubGroupCode()));
+								row.appendChild(sevenname);
+								// Attribute
+								Attr attr6 = doc.createAttribute(IPC_TYPE_ATTRIB);
+								attr6.setValue(Character);
+								sevenname.setAttributeNode(attr6);
+								// Row version Element
+								Element eightname = doc.createElement(ROW_VERSION_NODE);
+								eightname.appendChild(doc.createTextNode(ipasRow.getVersion()));
+								row.appendChild(eightname);
+								// Attribute
+								Attr attr7 = doc.createAttribute(IPC_TYPE_ATTRIB);
+								attr7.setValue(Number);
+								eightname.setAttributeNode(attr7);
+
+								String strKey = ipasRow.getEditionCode() + "*" + ipasRow.getSectionCode() + "*"
+								        + ipasRow.getClassCode() + "*" + ipasRow.getSubClassCode() + "*"
+								        + ipasRow.getGroupCode() + "*" + ipasRow.getSubGroupCode();
+								System.out.println("Key:" + strKey);
+								if (tempSet.contains(strKey)) {
+									System.out.println("Duplicate:" + strKey + " name=" + ipasRow.getName());
+								} else {
+									tempSet.add(strKey);
+								}
+
+								if (ipasRow.getName().getBytes("UTF-8").length > lengthName) {
+									lengthName = ipasRow.getName().getBytes("UTF-8").length;
+								}
+
+							}
+						}
+
+					}
+				}
+
+			}
+			System.out.println("Total IPC Rows" + ipcRows);
+			System.out.println("Maximum length in bytes: " + lengthName);
+			Transformer transformer = transformerFactory.newTransformer();
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			DOMSource source = new DOMSource(doc);
+			// WRITE XML file
+			StreamResult result = new StreamResult(new File(configProperties.getProperty("ipc.export.filename")));
+			transformer.transform(source, result);
+
+		} catch (ParserConfigurationException pce) {
+			pce.printStackTrace();
+		} catch (TransformerException tfe) {
+			tfe.printStackTrace();
+		}
+	}
+
+	private static void log(String strLine) {
+		System.out.println(strLine);
+	}
+
+	private static void loadConfiguration() {
+		// Loading the configuration from property files
+		log("..Loading Configuration...");
+		try {
+			configProperties.load(IPCXmlDataTrasformation.class.getResourceAsStream("ipc.properties"));
+
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+}

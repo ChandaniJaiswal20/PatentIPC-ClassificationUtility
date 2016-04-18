@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="ipcentry.xsl" type="text/xsl"?>	
+<ipcEntries displayMode="e20060101;a20060101;c20060101" ipcLevel="a" split="subclass" languages=",en,fr," size="14074">
+			 <ipcEntry kind="u" symbol="A23K0001000000" ipcLevel="C" edition="19900101"  entryType="K" lang="EN" priorityOrder="0">
+				<textBody>
+					<title>
+						<titlePart>
+							<text>EDIBLE OILS OR FATS, e.g. MARGARINES, SHORTENINGS, COOKING OILS</text>
+							<entryReference>animal feeding-stuffs <sref ref="A23K0001000000"/></entryReference>
+							<entryReference>foods or foodstuffs containing edible oils or fats <sref ref="A21D"/>, <sref ref="A23C"/>, <sref ref="A23G"/>, <sref ref="A23L"/></entryReference>
+							<entryReference>obtaining, refining, preserving <sref ref="C11B"/>, <sref ref="C11C"/></entryReference>
+							<entryReference>hydrogenation<sref ref="C11C0003120000"/></entryReference>
+						</titlePart>
+					</title>
+				</textBody> 
+				<ipcEntry kind="m" symbol="A23D0007000000" ipcLevel="C" edition="19900101" entryType="K" lang="EN" priorityOrder="0">
+					<textBody>
+						<title>
+							<titlePart>
+								<text>Edible oil or fat compositions containing an aqueous phase, e.g. margarines</text>
+							</titlePart>
+						</title>
+					</textBody>
+					<ipcEntry kind="1" symbol="A23D0007005000" ipcLevel="C" edition="19950101" entryType="K" lang="EN">
+						<textBody>
+							<title>
+								<titlePart>
+									<text>characterised by ingredients other than fatty acid triglycerides</text>
+								</titlePart>
+							</title>
+						</textBody>
+						<ipcEntry kind="2" symbol="A23D0007010000" ipcLevel="A" edition="19950101" entryType="K" lang="EN" nocore="yes">
+							<textBody>
+								<title>
+									<titlePart>
+										<text>Other fatty acid esters, e.g. phosphatides</text>
+									</titlePart>
+								</title>
+							</textBody>
+						</ipcEntry>
+					</ipcEntry>
+					<ipcEntry kind="1" symbol="A23D0007015000" ipcLevel="C" edition="19950101" entryType="K" lang="EN">
+						<textBody>
+							<title>
+								<titlePart>
+									<text>Reducing calorie content</text>
+								</titlePart>
+								<titlePart>
+									<text>Reducing fat content</text>
+								</titlePart>
+							</title>
+						</textBody>
+					</ipcEntry>
+					<ipcEntry kind="1" symbol="A23D0007020000" ipcLevel="C" edition="19900101" entryType="K" lang="EN">
+						<textBody>
+							<title>
+								<titlePart>
+									<text>characterised by the production or working-up</text>
+								</titlePart>
+							</title>
+						</textBody>
+						<ipcEntry kind="2" symbol="A23D0007040000" ipcLevel="A" edition="19900101" entryType="K" lang="EN" nocore="yes">
+							<textBody>
+								<title>
+									<titlePart>
+										<text>Working-up</text>
+									</titlePart>
+								</title>
+							</textBody>
+							<ipcEntry kind="3" symbol="A23D0007050000" ipcLevel="A" edition="19950101" entryType="K" lang="EN" nocore="yes">
+								<textBody>
+									<title>
+										<titlePart>
+											<text>characterised by essential cooling</text>
+										</titlePart>
+									</title>
+								</textBody>
+							</ipcEntry>
+						</ipcEntry>
+					</ipcEntry>
+					<ipcEntry kind="1" symbol="A23D0007060000" ipcLevel="C" edition="19900101" entryType="K" lang="EN">
+						<textBody>
+							<title>
+								<titlePart>
+									<text>Preservation of finished products</text>
+								</titlePart>
+							</title>
+						</textBody>
+					</ipcEntry>
+				</ipcEntry>
+				<ipcEntry kind="m" symbol="A23D0009000000" ipcLevel="C" edition="19900101" entryType="K" lang="EN" priorityOrder="10">
+					<textBody>
+						<title>
+							<titlePart>
+								<text>Other edible oils or fats, e.g. shortenings, cooking oils</text>
+							</titlePart>
+						</title>
+					</textBody>
+					<ipcEntry kind="1" symbol="A23D0009007000" ipcLevel="C" edition="19950101" entryType="K" lang="EN">
+						<textBody>
+							<title>
+								<titlePart>
+									<text>characterised by ingredients other than fatty acid triglycerides</text>
+								</titlePart>
+							</title>
+						</textBody>
+						<ipcEntry kind="2" symbol="A23D0009013000" ipcLevel="A" edition="19950101" entryType="K" lang="EN" nocore="yes">
+							<textBody>
+								<title>
+									<titlePart>
+										<text>Other fatty acid esters, e.g. phosphatides</text>
+									</titlePart>
+								</title>
+							</textBody>
+						</ipcEntry>
+					</ipcEntry>
+					<ipcEntry kind="1" symbol="A23D0009020000" ipcLevel="C" edition="19900101" entryType="K" lang="EN">
+						<textBody>
+							<title>
+								<titlePart>
+									<text>characterised by the production or working-up</text>
+								</titlePart>
+							</title>
+						</textBody>
+						<ipcEntry kind="2" symbol="A23D0009040000" ipcLevel="A" edition="19900101" entryType="K" lang="EN" nocore="yes">
+							<textBody>
+								<title>
+									<titlePart>
+										<text>Working-up</text>
+									</titlePart>
+								</title>
+							</textBody>
+							<ipcEntry kind="3" symbol="A23D0009050000" ipcLevel="A" edition="19950101" entryType="K" lang="EN" nocore="yes">
+								<textBody>
+									<title>
+										<titlePart>
+											<text>Forming free-flowing pieces</text>
+										</titlePart>
+									</title>
+								</textBody>
+							</ipcEntry>
+						</ipcEntry>
+					</ipcEntry>
+					<ipcEntry kind="1" symbol="A23D0009060000" ipcLevel="C" edition="19900101" entryType="K" lang="EN">
+						<textBody>
+							<title>
+								<titlePart>
+									<text>Preservation of finished products</text>
+								</titlePart>
+								</title>
+							</textBody>
+						</ipcEntry>
+					</ipcEntry>
+			</ipcEntry>	
+</ipcEntries>
+								
+				

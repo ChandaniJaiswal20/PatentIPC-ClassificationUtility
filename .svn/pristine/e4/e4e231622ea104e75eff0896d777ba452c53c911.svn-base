@@ -1,0 +1,9 @@
+# Configuration Parameter
+ipc.import.folderpath=D:\\Users\\devns\\Downloads\\20060101_fr_al_xml\\xml
+ipc.export.filename=D:\\workarea\\IPC\\IPC.xml
+
+# XML default data
+edition=8
+Version=2.5.27.1
+Notes=30/9/2013
+export_id=

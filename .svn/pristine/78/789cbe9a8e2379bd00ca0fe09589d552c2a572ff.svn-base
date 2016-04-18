@@ -1,0 +1,228 @@
+
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+public class ReadIPCXmlFile {
+
+	public List<CfClassIpc> getIPCData(String fileInput) {
+		DocumentBuilder dBuilder = null;
+		List<CfClassIpc> list = new ArrayList<CfClassIpc>();
+		try {
+
+			dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+			Document document = dBuilder.parse(new File(fileInput));
+			document.getDocumentElement().normalize();
+			document.getDocumentElement().getNodeName();
+			NodeList nList = document.getElementsByTagName("ipcEntry");
+			for (int temp = 0; temp < nList.getLength(); temp++) {
+				Node nNode = nList.item(temp);
+				nNode.getNodeName();
+				CfClassIpc cfClassIpc = new CfClassIpc();
+				if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+
+					Element eElement = (Element) nNode;
+					String kind = eElement.getAttribute("kind");
+					if (kind.equals("u") || kind.equals("m") || kind.equals("1") || kind.equals("2")
+					        || kind.equals("3") || kind.equals("4") || kind.equals("5") || kind.equals("6")
+					        || kind.equals("7") || kind.equals("8") || kind.equals("9")) {
+					} else {
+						continue;
+					}
+
+					String symbol = eElement.getAttribute("symbol");
+					// Language
+					cfClassIpc.setLanguage("EN");
+					// Version
+					cfClassIpc.setVersion("1");
+
+					NodeList textBodyNodeList = eElement.getElementsByTagName("textBody");
+					if (textBodyNodeList != null && textBodyNodeList.getLength() > 0) {
+
+						Element textBodyNode = (Element) textBodyNodeList.item(0);
+						NodeList titlePartNodeList = textBodyNode.getElementsByTagName("titlePart");
+
+						if (titlePartNodeList != null) {
+							StringBuffer titleText = new StringBuffer();
+							StringBuffer entryRefText = new StringBuffer();
+							// Traversing through the Title part node till three
+							// level
+
+							for (int i = 0; i < titlePartNodeList.getLength(); i++) {
+								NodeList titlePartNode = titlePartNodeList.item(i).getChildNodes();
+								if (titlePartNode != null) {
+									for (int j = 0; j < titlePartNode.getLength(); j++) {
+										Node titlePartChild = titlePartNode.item(j);
+										if (titlePartChild.getNodeType() == Node.ELEMENT_NODE) {
+
+											if ("text".equalsIgnoreCase(titlePartChild.getNodeName())) {
+												if (titleText.length() == 0) {
+													titleText.append(titlePartChild.getTextContent());
+												} else {
+													titleText.append(";" + titlePartChild.getTextContent());
+												}
+											} else if ("entryReference".equalsIgnoreCase(titlePartChild.getNodeName())) {
+												if (entryRefText.length() == 0) {
+													entryRefText.append(titlePartChild.getTextContent());
+												} else {
+													entryRefText.append(";" + titlePartChild.getTextContent());
+												}
+												StringBuffer refText = new StringBuffer();
+												NodeList entryRefNodeList = titlePartChild.getChildNodes();
+												if (entryRefNodeList != null) {
+													for (int k = 0; k < entryRefNodeList.getLength(); k++) {
+														Node entryRefNode = entryRefNodeList.item(k);
+														if (entryRefNode.getNodeType() == Node.ELEMENT_NODE) {
+															if ("sref".equalsIgnoreCase(entryRefNode.getNodeName())) {
+																Element entryRefNodeElement = (Element) entryRefNode;
+																String srefAtribValue = getSymbolDisplayName(entryRefNodeElement
+																        .getAttribute("ref"));
+																if (refText.length() > 0) {
+																	refText.append(", " + srefAtribValue);
+																} else {
+																	refText.append(" " + srefAtribValue);
+																}
+
+															} else if ("mref".equalsIgnoreCase(entryRefNode
+															        .getNodeName())) {
+																Element entryRefNodeElement = (Element) entryRefNode;
+																String mrefAtribStart = getSymbolDisplayName(entryRefNodeElement
+																        .getAttribute("ref"));
+																String mrefAtribEnd = getSymbolDisplayName(entryRefNodeElement
+																        .getAttribute("endRef"));
+																if (refText.length() > 0) {
+																	refText.append(", " + mrefAtribStart + "-"
+																	        + mrefAtribEnd);
+																} else {
+																	refText.append(" " + mrefAtribStart + "-"
+																	        + mrefAtribEnd);
+																}
+
+															}
+
+														}
+													}
+													entryRefText.append(refText);
+
+												}
+
+											}
+
+										}
+
+									}
+									if (entryRefText.length() > 0) {
+										String strEntryRef = entryRefText.toString().replaceAll(", ,", "");
+										titleText.append("(" + strEntryRef + ")");
+									}
+
+								}
+
+							}
+							if (titleText.length() == 0) {
+								cfClassIpc.setName("");
+							} else {
+								cfClassIpc.setName(titleText.toString());
+							}
+
+						}
+
+					}
+
+					// cfClassIpc.setName(name);
+					// Section Code
+					cfClassIpc.setSectionCode(symbol.substring(0, 1));
+
+					// Class code
+					cfClassIpc.setClassCode(symbol.substring(1, 3));
+
+					// Subclass code
+
+					cfClassIpc.setSubClassCode(symbol.substring(3, 4));
+
+					// Group code
+					if (kind.equals("u")) {
+						cfClassIpc.setGroupCode("000");
+						cfClassIpc.setSubGroupCode("00000");
+
+					} else {
+
+						String groupCode = symbol.substring(4, 8);
+						String subGroupCode = symbol.substring(8, 14);
+
+						if ("0000".equals(groupCode)) {
+							groupCode = "000";
+						} else {
+							groupCode = trimLead(groupCode);
+						}
+
+						if ("000000".equals(subGroupCode)) {
+							subGroupCode = "00000";
+						} else {
+							subGroupCode = removeTrailingZeros(subGroupCode);
+						}
+						
+						cfClassIpc.setGroupCode(groupCode);
+
+						// SubGroup Code
+						cfClassIpc.setSubGroupCode(subGroupCode);
+
+					}
+
+					int editionCode = 8;
+					cfClassIpc.setEditionCode(editionCode + "");
+				}
+				list.add(cfClassIpc);
+				// return list;
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		// System.out.println("List size : " + list.size());
+		return list;
+	}
+
+	private String trimLead(String a) {
+		return a.replaceAll("^0+(?=\\d+$)", "");
+	}
+
+	private String removeTrailingZeros(String b) {
+		return b.replaceAll("[0]*$", "");
+	}
+
+	private static final int FULL_SYMBOL_LENGTH = 14;
+
+	private String getSymbolDisplayName(String symbolName) {
+		String retSymbol = symbolName;
+		if (symbolName.length() == FULL_SYMBOL_LENGTH) { // full symbol length;
+			String groupCode = symbolName.substring(4, 8);
+			String subGroupCode = symbolName.substring(8, 14);
+
+			if ("0000".equals(groupCode)) {
+				groupCode = "00";
+			} else {
+				groupCode = trimLead(groupCode);
+			}
+
+			if ("000000".equals(subGroupCode)) {
+				subGroupCode = "00";
+			} else {
+				subGroupCode = removeTrailingZeros(subGroupCode);
+			}
+
+			retSymbol = symbolName.substring(0, 4) + " " + groupCode + "/" + subGroupCode;
+		}
+		return retSymbol;
+	}
+
+}

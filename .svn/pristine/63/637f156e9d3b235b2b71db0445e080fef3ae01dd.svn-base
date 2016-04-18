@@ -1,0 +1,151 @@
+package com.ipc;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+public class ReadXmlFile {
+
+	public List<CfClassIpc> getIPCData(String fileInput) {
+		DocumentBuilder dBuilder = null;
+		List<CfClassIpc> list = new ArrayList<CfClassIpc>();
+		try {
+
+			dBuilder = DocumentBuilderFactory.newInstance()
+					.newDocumentBuilder();
+			System.out.println("File Name : " + fileInput );
+			Document document = dBuilder.parse(new File(fileInput));
+			document.getDocumentElement().normalize();
+			document.getDocumentElement().getNodeName();
+			NodeList nList = document.getElementsByTagName("ipcEntry");
+			// System.out.println("---------------------------- Nodes " +
+			// nList.getLength());
+			for (int temp = 0; temp < nList.getLength(); temp++) {
+				Node nNode = nList.item(temp);
+				nNode.getNodeName();
+				CfClassIpc cfClassIpc = new CfClassIpc();
+				if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+
+					Element eElement = (Element) nNode;
+					String kind = eElement.getAttribute("kind");
+					if (kind.equals("u") || kind.equals("m")
+							|| kind.equals("1") || kind.equals("2")
+							|| kind.equals("3") || kind.equals("4")
+							 || kind.equals("5") || kind.equals("6")
+							 || kind.equals("7") || kind.equals("8")
+							 || kind.equals("9")) {
+					} else {
+						continue;
+					}
+					
+					String symbol = eElement.getAttribute("symbol");
+
+					// Language
+					cfClassIpc.setLanguage("EN");
+					// Version
+					cfClassIpc.setVersion("1");
+					//NodeList test=document.getElementsByTagName("titlePart");
+					// Name
+					//String name = eElement.getElementsByTagName("text").item(0).getTextContent();
+					
+					NodeList titlePart = document.getElementsByTagName("titlePart");
+					String name = eElement.getElementsByTagName("text").item(0).getTextContent();
+					//System.out.println("name"+name);
+					String tempVar = "";
+					for (int i = 0; i < titlePart.getLength(); i++) {
+				        NodeList childList = titlePart.item(i).getChildNodes();
+				       // tempVar = "";
+				        for (int j = 0; j < childList.getLength(); j++) {
+				            Node childNode = childList.item(j);
+				            NodeList childNodeList = childList.item(j).getChildNodes();
+				           
+				            if ("entryReference".equals(childNode.getNodeName())) {
+				              String entryReferance=  childList.item(j).getTextContent() .trim();
+				             
+				               for(int x=0; x<childNodeList.getLength();x++){
+				            	   Node childNodeX = childNodeList.item(x);
+				            	   if ("sref".equals(childNodeX.getNodeName())) {
+				            		   
+				            		   String ref =  childList.item(x).getNodeValue();
+				            		   childNodeX.getAttributes().item(0);
+				            		 
+				            		   //System.out.println(childNodeList.item(x).getAttributes());
+						             
+						                tempVar = entryReferance+ childNodeX.getAttributes().item(0) +";" ;
+						             //  System.out.println(" tempVar " +tempVar); 
+				            	   }
+				               }
+				                
+				            }
+				        }
+				        if(tempVar !=null && !"".equalsIgnoreCase(tempVar)){
+							//if(tempVar.length() >0 && tempVar.lastIndexOf(";") ==0){
+								cfClassIpc.setName(name + "("+ (tempVar.length()) +")");
+								System.out.println("if " + name + (tempVar.length()));
+							//}
+							
+						}
+				    }
+					
+					//cfClassIpc.setName(name);
+					// Section Code
+					cfClassIpc.setSectionCode(symbol.substring(0, 1));
+
+					// Class code
+					cfClassIpc.setClassCode(symbol.substring(1, 3));
+
+					// Subclass code
+
+					cfClassIpc.setSubClassCode(symbol.substring(3, 4));
+
+					// Group code
+					if (kind.equals("u")) {
+						cfClassIpc.setGroupCode("000");
+						cfClassIpc.setSubGroupCode("00000");
+
+					} else {
+
+						cfClassIpc.setGroupCode(trimLead(symbol.substring(4, 8)));
+						
+						// SubGroup Code
+						cfClassIpc.setSubGroupCode(removeTrailingZeros(symbol.substring(8, 14)));
+						
+					}
+
+					int editionCode = 8;
+					 cfClassIpc.setEditionCode(editionCode + "");
+				}
+				list.add(cfClassIpc);
+				// return list;
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		// System.out.println("List size : " + list.size());
+		return list;
+	}
+
+
+		 private String trimLead(String  a){
+			return a.replaceAll("^0+(?=\\d+$)", "");
+		 }
+		 
+		 private String removeTrailingZeros(String  b) {
+			  return b.replaceAll("[0]*$", "");
+			}
+ 
+		 
+	 
+}
+
